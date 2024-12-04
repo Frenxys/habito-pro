@@ -8,7 +8,6 @@
 
     // Toggle complete and update points
     function toggleComplete(index) {
-        habits[index].completed = !habits[index].completed;
         updatePoints();
     }
 
