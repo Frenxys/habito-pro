@@ -1,21 +1,25 @@
 <script>
+    import { onMount } from "svelte";
     let habits = [
-        { name: "Drink water", completed: false },
-        { name: "Exercise", completed: false },
+        { name: "Drink water", completed: false, duration: "1 month", startDate: new Date() },
+        { name: "Exercise", completed: false, duration: "1 week", startDate: new Date() },
     ];
     let points = 0;
     let newHabit = "";
+    let newDuration = "1 month";
 
     // Toggle complete and update points
     function toggleComplete(index) {
+        
         updatePoints();
     }
 
     // Add new habit
     function addHabit() {
         if (newHabit.trim() !== "") {
-            habits = [...habits, { name: newHabit, completed: false }];
+            habits = [...habits, { name: newHabit, completed: false, duration: newDuration, startDate: new Date() }];
             newHabit = "";
+            newDuration = "1 month";  // Reset to default
             updatePoints();
         }
     }
@@ -30,6 +34,23 @@
     function updatePoints() {
         points = habits.reduce((total, habit) => total + (habit.completed ? 10 : 0), 0);
     }
+
+    // Calculate the progress based on duration
+    function getProgress(habit) {
+        const today = new Date();
+        const diffInDays = Math.floor((today - new Date(habit.startDate)) / (1000 * 3600 * 24));
+        let totalDurationDays;
+
+        if (habit.duration === "1 month") {
+            totalDurationDays = 30;
+        } else if (habit.duration === "1 week") {
+            totalDurationDays = 7;
+        } else if (habit.duration === "1 year") {
+            totalDurationDays = 365;
+        }
+
+        return Math.min((diffInDays / totalDurationDays) * 100, 100); // Ensure it doesn't exceed 100%
+    }
 </script>
 
 <main class="main-container">
@@ -38,7 +59,7 @@
         <p class="points">Points: <span>{points}</span></p>
         <p>Completed: {habits.filter(habit => habit.completed).length} / {habits.length}</p>
     </div>
-    
+
     <div class="habit-list">
         {#each habits as habit, index (habit.name)}
             <div class="habit-item" class:completed={habit.completed}>
@@ -54,21 +75,28 @@
                         <i class="fas fa-check-circle"></i>
                     {/if}
                 </div>
+                <div class="progress-bar">
+                    <div class="progress" style="width: {getProgress(habit)}%"></div>
+                </div>
                 <button class="remove-btn" on:click={() => removeHabit(index)}>Remove</button>
             </div>
         {/each}
     </div>
-    
+
     <div class="add-habit">
         <input
             type="text"
             bind:value={newHabit}
             placeholder="Add a new habit"
         />
+        <select bind:value={newDuration}>
+            <option value="1 week">1 week</option>
+            <option value="1 month">1 month</option>
+            <option value="1 year">1 year</option>
+        </select>
         <button on:click={addHabit}>Add Habit</button>
     </div>
 </main>
-
 <style>
     /* General styling */
     body {
@@ -179,6 +207,14 @@
         color: #e0e0e0;
     }
 
+    .add-habit select {
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #333;
+        color: #e0e0e0;
+        margin-right: 10px;
+    }
+
     .add-habit button {
         padding: 10px 15px;
         background-color: #76c7c0;
@@ -190,5 +226,20 @@
 
     .add-habit button:hover {
         background-color: #64b3b2;
+    }
+
+    .progress-bar {
+        width: 100%;
+        background-color: #555;
+        border-radius: 5px;
+        height: 10px;
+        margin-top: 10px;
+    }
+
+    .progress {
+        height: 100%;
+        background-color: #76c7c0;
+        border-radius: 5px;
+        transition: width 0.3s ease;
     }
 </style>
