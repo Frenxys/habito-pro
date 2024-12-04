@@ -1,28 +1,28 @@
 <script>
-    let habits = ["Drink water", "Exercise", "Read a book"];
-    let newHabit = "";
+    let habits = [
+        { name: "Drink water", completed: false },
+        { name: "Exercise", completed: false },
+    ];
+    let points = 0;
 
-    function addHabit() {
-        if (newHabit.trim()) {
-            habits = [...habits, newHabit.trim()];
-            newHabit = "";
-        }
-    }
-
-    function removeHabit(index) {
-        habits = habits.filter((_, i) => i !== index);
+    function updatePoints() {
+        points = habits.reduce((total, habit) => total + (habit.completed ? 10 : 0), 0);
     }
 </script>
 
 <main>
     <h1>Your Habits</h1>
+    <p>Points: {points}</p>
     <ul>
         {#each habits as habit, index}
             <li>
-                {habit} <button on:click={() => removeHabit(index)}>Remove</button>
+                <input
+                    type="checkbox"
+                    bind:checked={habit.completed}
+                    on:change={updatePoints}
+                />
+                {habit.name}
             </li>
         {/each}
     </ul>
-    <input type="text" bind:value={newHabit} placeholder="New habit..." />
-    <button on:click={addHabit}>Add Habit</button>
 </main>
